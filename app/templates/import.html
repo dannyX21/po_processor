@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %} Order Entry - Import Purchase Order {% endblock %}
+{% block page_content %}
+<h3>Import Purchase Order</h3>
+<p>File must have ".pdf" extension.</p>
+<div class="col-md-4">
+  {{ wtf.quick_form(form) }}
+</div>
+
+{% endblock %}

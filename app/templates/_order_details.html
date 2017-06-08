@@ -1,0 +1,57 @@
+
+<p>Vendor: <span class="text-info">{{ po_line.vendor.name }}</span></p>
+
+<p>Ship via: <span class="text-info">{{ po_line.ship_via.name }}</span></p>
+<p>Tracking Number: {% if po_line.ship_via.tracking_url and '@' in po_line.ship_via.tracking_url and po_line.tracking_number|length > 0 %} <a href="{{po_line.ship_via.tracking_url|replace('@',po_line.tracking_number) }}" target="_blank"><span class="text-info">{{ po_line.tracking_number}}</span></a>{% else %}<span>{{ po_line.tracking_number }}</span>{% endif %}</p>
+{% if po_line.priority %}<p><strong><span class="text-danger">High Priority</span></strong></p>{% endif %}
+
+<table class='table table-striped table-bordered table-hover table-condensed' id="tbl-details">
+  <thead>
+    <tr>
+      <th>P/N</th>
+      <th>Description</th>
+      <th>Qty Ordered</th>
+      <th>Qty Received</th>
+      <th>Balance</th>
+      <th>Expected Del. Date</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class='center-align'>{{ po_line.pn }}</td>
+      <td>{{ po_line.description }}</td>
+      <td class='number'>{{ '{:,}'.format(po_line.qty_ordered) }}</td>
+      <td class='number'>{{ '{:,}'.format(po_line.qty_received) }}</td>
+      <td class='number'>{{ '{:,}'.format(po_line.balance)  }}</td>
+      <td class='center-align'>{% if po_line.expected_del_date %}{{ po_line.expected_del_date.strftime('%m/%d/%y')}} {% endif %}</td>
+    </tr>
+  </tbody>
+</table>
+{% if posts %}
+<div id="div-posts">
+<ul class="posts">
+  {% for post in posts %}
+    <li class="post">
+      <div class="post-thumbnail">
+        <a href="{{ url_for('.user', username=post.author.username) }}">
+          <img class="img-rounded profile-thumbnail" src="{{ post.author.gravatar(size=40) }}">
+        </a>
+      </div>
+      <div class="post-content">
+        <div class="post-date">{{ moment(post.timestamp).fromNow() }}</div>
+        <div class="post-author"><a href="{{ url_for('.user', username=post.author.username) }}">{{ post.author.username }}</a></div>
+        <div class="post-body">
+          {{ post.body }}
+        </div>
+      </div>
+    </li>
+  {% endfor %}
+</ul>
+</div>
+{% endif %}
+<div class="form-group">
+  <label class="control-label" for="txt-comment">Comment</label>
+  <textarea class="form-control" id="txt-comment" name="txt-comment" data-order="{{ po_line.id }}"></textarea>
+</div>
+<input class="btn btn-primary btn-sm" id="btn-post" name="btn-post" type="button" value="Post" data-order="{{ po_line.id }}">
+{{ moment.include_moment() }}

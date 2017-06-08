@@ -1,0 +1,48 @@
+{% import "_macros.html" as macros %}
+<table class='table table-striped table-bordered table-hover table-condensed' id='tbl-orders'>
+  <thead>
+    <tr>
+      {% if current_user.can(Permission.MODIFY) %}
+      {% set can_modify = True %}
+      <th><input type="checkbox" value="" id="chk_master"></th>
+      {% endif %}
+      <th>PO#</th>
+      <th>Customer</th>
+      <th>Date Received</th>
+      <th>Ship to:</th>
+      <th>Planner</th>
+      <th>CSR</th>
+      <th>Status</th>
+      <th># lines</th>
+      <th>Total</th>
+    </tr>
+  </thead>
+  <tbody>
+  {% for order in orders %}
+    <tr>
+      {% if can_modify %}
+        <td><input type="checkbox" value="{{order.id}}" id="chk_{{order.id}}" class="chk_item"></td>
+      {% else %}
+        <td> </td>
+      {% endif %}
+      <td class='center-align'><a href="/view-order/{{order.id}}">{{ order.po_number }}</a></td>
+      <td class='center-align'>{{ order.customer.name }}</td>
+      <td class='number'>{{ order.date_received.strftime('%m/%d/%y') }}</td>
+      <td class='center-align'>{{ order.ship_to }}</td>
+      <td class='center-align'>{{ order.planner }}</td>
+      <td class='center-align'>{{ order.submitter.username }}</td>
+      <td class='center-align'>
+        {% if order.status == -1 %}
+          <span class="glyphicon glyphicon-exclamation-sign"></span>
+        {% elif order.status == 0 %}
+          <span class="glyphicon glyphicon-ok-circle"></span>
+        {% elif order.status == 1 %}
+          <span class="glyphicon glyphicon-save"></span>
+        {% endif %}
+      </td>
+      <td class='number'>{{ '{:,}'.format(order.po_lines.count()) }}</td>
+      <td class='number'>{{ '${:,.2f}'.format(order.total) }} </td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>

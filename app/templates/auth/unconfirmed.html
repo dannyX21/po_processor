@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block title %}Tracker - Unconfirmed account {% endblock %}
+
+{% block page_content %}
+<div class="page-header">
+    <h1>
+        Dear, {{ current_user.username }}!
+    </h1>
+    <h3>Your account has not been confirmed yet.</h3>
+    <p>
+        In order to access Tracker, please confirm your account first.
+        You should have received a confirmation email.
+    </p>
+    <p>
+        Do you need another confirmation email?
+        <a href="{{ url_for('auth.resend_confirmation') }}">Please click here.</a>
+    </p>
+</div>
+{% endblock %}

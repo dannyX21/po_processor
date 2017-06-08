@@ -1,0 +1,26 @@
+<table class='table table-striped table-bordered table-hover table-condensed' id='tbl-item'>
+  <thead>
+    <tr>
+      <th>P/N</th>
+      <th>Description</th>
+      <th>Rev. Level</th>
+      <th>Unit Price</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="center-align">
+        {{ pn }}
+      </td>
+      <td class="center-align">
+        {{ result[2].description }}
+      </td>
+      <td class="center-align">
+        {{ result[1] }}
+      </td>
+      <td class="number">
+        ${{ result[0] }}
+      </td>
+    </tr>
+  </tbody>
+</table>

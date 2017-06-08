@@ -1,0 +1,15 @@
+#tbl-orders{
+  font-size: small;
+}
+
+.number{
+  text-align: right;
+}
+
+.center-align{
+  text-align: center;
+}
+
+table thead tr th{
+  text-align: center;
+}

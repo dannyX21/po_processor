@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block title %}Order Entry - {% if status==1 %}Processed {%else%} Unprocessed {%endif%} orders{% endblock %}
+
+{% block head %}
+  {{ super() }}
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/styles.css') }}">
+{% endblock %}
+
+{% block page_content %}
+  <h1>{% if status==1 %}Processed {%else%} Unprocessed {%endif%} orders</h1>
+  <br>
+  <div id="div_orders">
+    {% include '_view_orders.html' %}
+  </div>
+{% endblock %}

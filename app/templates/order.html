@@ -1,0 +1,201 @@
+{% extends "base.html" %}
+{% block title %}Order# {{ order.po_number }} {% endblock %}
+{% block head %}
+  {{ super() }}
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/styles.css') }}">
+{% endblock %}
+{% block page_content %}
+<div class="page-header">
+    <h1>PO# {{ order.po_number }}</h1>
+    <h3>Customer: {{order.customer.name }}</h3>
+    {% if order.status ==0 %}
+    <button type="button" class="btn btn-success" id="btn-mark-processed">Mark as Processed</button>
+    {% else %}
+    <button type="button" class="btn btn-warning" id="btn-mark-unprocessed">Mark as Unprocessed</button>
+    {%endif%}
+    <!-- <button type="button" class="btn btn-info" id="btn-update-dates">Update dates</button> -->
+</div>
+    <table class='table table-striped table-bordered table-hover table-condensed' id='tbl-orders'>
+      <thead>
+        <tr>
+          <th>Date Received</th>
+          <th>Ship to:</th>
+          <th>Planner</th>
+          <th>CSR</th>
+          <th>Status</th>
+          <th># lines</th>
+          <th>Total</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class='number'>{{ order.date_received.strftime('%m/%d/%y') }}</td>
+          <td class='center-align'>{{ order.ship_to }}</td>
+          <td class='center-align'>{{ order.planner }}</td>
+          <td class='center-align'>{{ order.submitter.username }}</td>
+          <td class='center-align'>
+            {% if order.status == -1 %}
+              <span class="glyphicon glyphicon-exclamation-sign"></span>
+            {% elif order.status == 0 %}
+              <span class="glyphicon glyphicon-ok-circle"></span>
+            {% elif order.status == 1 %}
+              <span class="glyphicon glyphicon-save"></span>
+            {% endif %}
+          </td>
+          <td class='number'>{{ '{:,}'.format(order.po_lines.count()) }}</td>
+          <td class='number'>{{ '${:,.2f}'.format(order.total) }} </td>
+        </tr>
+      </tbody>
+    </table>
+    <table class='table table-striped table-bordered table-hover table-condensed'>
+      <thead>
+        <tr>
+          <th>
+            <input type="checkbox" id="master-chkbox" />
+          </th>
+          <th>ln#</th>
+          <th>P/N</th>
+          <th>Serie</th>
+          <th>Req. Rev. Level</th>
+          <th>Our Rev. Level</th>
+          <th>Req. Qty</th>
+          <th>Req. Unit Price</th>
+          <th>Our Unit Price</th>
+          <th>Req. Ship Date</th>
+          <th>Update</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% set total = 0 %}
+        {% for line in order.po_lines %}
+            {% block loop_item scoped %}{% set total = total + 1 %} {% endblock %}
+          <tr>
+            <td class="center-align"><input type="checkbox" class="chkbox-line" data-lineid="{{line.id}}"</td>
+            <td class="center-align">{{ line.ln }}</td>
+            <td class="center-align">{{ line.pn }}</td>
+            <td class="center-align">{{ line.serie.description }}</td>
+            <td class="center-align">{{ line.req_rev_level }}</td>
+            <td class="center-align">{{ line.our_rev_level }}</td>
+            <td class="number">{{ "{:,}".format(line.req_qty) }}</td>
+            <td class="number">{{ "${:,.2f}".format(line.req_unit_price) }}</td>
+            <td class="center-align"><input class="txt_unit_price {% if line.req_unit_price == line.our_unit_price %}text-success {% else %} text-danger {% endif %} " type="text" size="6" id="txt_our_price{{ line.id }}" value="{{ '{:,.2f}'.format(line.our_unit_price) }}" style="text-align:right;"/></td>
+            <td class="center-align"><input type="text" size="6" id="txt_req_ship{{ line.id }}" value="{{ line.req_ship_date.strftime('%m%d%y') }}" style="text-align:center;"/></td>
+            <td class="center-align">
+              <button class="btn btn-sm btn-info btn-update" data-line="{{line.id}}" id="btn-update{{line.id}}">Update</button>
+            </td>
+          </tr>
+        {% endfor %}
+        <tr>
+          <td>
+            Totals
+          </td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td class="number">{{ "${:,.2f}".format(order.total) }}</td>
+          <td class="number"><span id="our_total">{{ total }}</span></td>
+          <td></td>
+          <td></td>
+        </tr>
+      </tbody>
+    </table>
+
+{% endblock %}
+
+{%block scripts %}
+{{ super() }}
+<script>
+Number.prototype.formatMoney = function(c, d, t){
+var n = this,
+  c = isNaN(c = Math.abs(c)) ? 2 : c,
+  d = d == undefined ? "." : d,
+  t = t == undefined ? "," : t,
+  s = n < 0 ? "-" : "",
+  i = parseInt(n = Math.abs(+n || 0).toFixed(c)) + "",
+  j = (j = i.length) > 3 ? j % 3 : 0;
+ return s + (j ? i.substr(0, j) + t : "") + i.substr(j).replace(/(\d{3})(?=\d)/g, "$1" + t) + (c ? d + Math.abs(n - i).toFixed(c).slice(2) : "");
+};
+  var quantities = [ {% for line in order.po_lines %} {{ line.req_qty }} , {% endfor %} 0 ];
+  var unit_prices = [ {% for line in order.po_lines %} {{ line.our_unit_price }} , {% endfor %} 0 ];
+  function calculate_total(){
+    var total=0;
+    for(c=0;c<quantities.length;c++)
+    {
+      total+=quantities[c]*unit_prices[c];
+    }
+    return total;
+  };
+  $(document).ready(function(){
+    function update_total(total){
+      var txt_total = "$" +total.formatMoney(2)
+      var po_total = $("#our_total").parent().prev().text();
+      $("#our_total").text(txt_total);
+      if(txt_total!=po_total){
+        $("#our_total").removeClass("text-success");
+        $("#our_total").addClass("text-danger");
+      }
+      else {
+        $("#our_total").removeClass("text-danger");
+        $("#our_total").addClass("text-success");
+      }
+    }
+
+    var total = calculate_total();
+    $("#our_total").text("$" +total.formatMoney(2));
+    update_total(total);
+
+    $(".btn-update").click(function (){
+      var line_id = $(this).data('line');
+      var txt_our_price = '#txt_our_price'+line_id;
+      var txt_req_ship = '#txt_req_ship'+line_id;
+      var our_unit_price = $(txt_our_price).val();
+      var req_ship_date = $(txt_req_ship).val();
+      $.post("/update_line/"+line_id, {our_unit_price: our_unit_price, req_ship_date: req_ship_date}, function(data, status){
+      });
+      //Actualizar arreglo de unit_prices...
+      var total = 0
+      var c = 0;
+      $(".txt_unit_price").each(function (){
+        unit_prices[c]=parseFloat($(this).val());
+        //alert(quantities[c]+ " * "+ unit_prices[c]+" = "+ (quantities[c]*unit_prices[c]));
+        var req_unit_price = parseFloat($(this).parent().prev().text().substring(1));
+        if(req_unit_price!=unit_prices[c]){
+          $(this).removeClass("text-success");
+          $(this).addClass("text-danger");
+        }
+        else {
+          $(this).removeClass("text-danger");
+          $(this).addClass("text-success");
+        }
+        total+=(quantities[c]*unit_prices[c]);
+        c++;
+        update_total(total);
+      });
+    });
+    $("#btn-mark-processed").click(function(){
+      $.post("/update_order_status/{{order.id}}", {status: 1}, function(data, status){
+      });
+      location.reload();
+    });
+    $("#btn-mark-unprocessed").click(function(){
+      $.post("/update_order_status/{{order.id}}", {status: 0}, function(data, status){
+      });
+      location.reload();
+    });
+    $("#master-chkbox").change(function(){
+      if($(this).is(':checked')){
+        $(".chkbox-line").each(function(){
+          $(this).prop("checked",true);
+        });
+      }
+      else{
+        $(".chkbox-line").each(function(){
+          $(this).prop("checked",false);
+        });
+      }
+    });
+  });
+</script>
+{% endblock %}

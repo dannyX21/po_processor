@@ -1,0 +1,6 @@
+The following order has been updated:
+
+PO# {{ po_line.po_number }}
+P/N: {{ po_line.pn }}
+Old Status: {{ oldstatus }}
+New Status: {{ newstatus }}

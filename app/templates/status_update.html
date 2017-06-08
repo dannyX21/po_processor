@@ -1,0 +1,18 @@
+<h3>Hello,</h3>
+<h3>The following order has been updated:</h3>
+
+<p>PO# <strong>{{ po_line.po_number }}</strong></p>
+<p>Vendor: <strong>{{ po_line.vendor.name }}</strong></p>
+<p>P/N: <strong>{{ po_line.pn }}</strong></p>
+<p>Description:  <strong>{{ po_line.description }}</strong></p>
+<p>Old Status: <strong>{{ oldstatus }}</strong></p>
+<p>New Status: <strong>{{ newstatus }}</strong></p>
+<p>Expected Delivery Date: <strong>{{ po_line.expected_del_date.strftime('%m/%d/%y')}}</strong></p>
+<p>Ship via: <strong>{{ po_line.ship_via.name}}</strong></p>
+{% if po_line.tracking_number is not none and po_line.tracking_number|length >0 %}
+  <p>Tracking Number: {% if po_line.ship_via.tracking_url and '@' in po_line.ship_via.tracking_url %} <a href="{{po_line.ship_via.tracking_url|replace('@',po_line.tracking_number) }}" target="_blank"><span class="text-info">{{ po_line.tracking_number}}</span></a>{% else %}<span>{{ po_line.tracking_number }}</span>{% endif %}</p>
+{% endif %}
+<br>
+<p>To unfollow this order, please <a href="{{ url_for('main.index',_external=True) }}unsubscribe/{{ po_line.id }}" target="_blank">Click here.</a></p>
+<p>Best regards,</p>
+<p>The Tracker team.</p>

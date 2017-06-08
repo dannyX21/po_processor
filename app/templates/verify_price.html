@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}Order Entry - Verify Unit Price{% endblock %}
+{% block head %}
+  {{ super() }}
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/styles.css') }}">
+{% endblock %}
+{% block page_content %}
+<div class="page-header">
+  <div class="container">
+    <h1>Verify Unit Price</h1>
+  </div>
+</div>
+<div class="form-horizontal">
+  <div class="form-group">
+    <label for="txt-pn" class="control-label col-md-1">P/N: </label>
+    <div class="col-md-2">
+      <input type="text" class="form-control" id="txt-pn" placeholder="HC6XXYY" style="text-transform:uppercase"/>
+    </div>
+    <div class="col-md-1">
+      <button type="button" class="btn btn-primary" id="btn-verify">Verify</button>
+    </div>
+  </div>
+</div>
+<br /></br>
+<div id="div-info">
+
+</div>
+{% endblock %}
+{%block scripts %}
+{{ super() }}
+<script>
+  $(document).ready(function(){
+    $("#btn-verify").click(function(){
+      var pn = $("#txt-pn").val().toUpperCase();      
+      $.post("/verify/"+pn, function(data, status){
+        $("#div-info").html(data);
+      });
+    });
+  });
+</script>
+{% endblock %}
